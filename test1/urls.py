@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from reg.views import login,reg,Pro_User,SerializerUser, SerializerReg, otp
+from reg.views import login,reg,Pro_User,SerializerUser, SerializerReg, otp_gen, otp_ver
 from rest_framework import routers
 
 
@@ -26,7 +26,8 @@ router.register(r'reg_api',SerializerReg)
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', login),
-    url(r'^otp/', otp),
+    url(r'^otp_gen/', otp_gen),
+    url(r'^otp_ver/', otp_ver),
     url(r'^reg/',reg),
     url(r'^pro_user/',Pro_User.as_view()),
     url(r'',include(router.urls))

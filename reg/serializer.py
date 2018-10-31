@@ -30,8 +30,3 @@ class RegSerializer(serializers.ModelSerializer):
         if not re.match(r'\d+/\d+/\d+',value):  # check name has more than 1 word
             raise serializers.ValidationError("Please enter valid dob")  # raise ValidationError
         return value
-
-class OtpSerializer(serializers.ModelSerializer):
-    otp = serializers.IntegerField()
-    class Meta:
-        fields =('otp',)
