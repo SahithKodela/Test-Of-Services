@@ -7,12 +7,13 @@ from forms import LoginForm,Reg
 from django import forms
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
-from .serializer import PostSerializer, RegSerializer
+from .serializer import PostSerializer, RegSerializer,PhoneSerializer, OtpSerializer
 from rest_framework.response import Response
 from .models import Register
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
+from rest_framework.generics import ListAPIView, RetrieveAPIView, DestroyAPIView, UpdateAPIView, CreateAPIView
 from django_otp.oath import TOTP
 from django_otp.util import random_hex
 import time
@@ -89,27 +90,55 @@ class TOTPVerification:
         f = urllib.urlopen(url, data)
         print f.read().decode('utf-8')
 
+phone1 = None
 
 @api_view(['POST',])
 def otp_gen(request):
     if request.method == 'POST':
+        global phone1
         phone1 = TOTPVerification()
         phno = request.data
         generated_token = phone1.generate_token()
-        pho = phone1.sms(generated_token, phno)
-        if pho:
-            return Response({"message": generated_token, "data": request.data, "ststus":'Successful'})
+        phone1.sms(generated_token, phno)
         return Response({"message": generated_token, "data": request.data, "ststus": 'Failure'})
     return Response({"message": "Hello, world!"})
 
-@api_view(['POST,'])
+@api_view(['POST',])
 def otp_ver(request):
     if request.method == 'POST':
-        phone1 = TOTPVerification()
         token = request.data
-        if phone1.verify_token(token):
-            return Response({"message": 'Your Successfully ', "data": request.data, "ststus": 'Successful'})
-        return Response({"message": 'unable to pair', "data": request.data, "ststus": 'Failure'})
+        if phone1:
+            if phone1.verify_token(token):
+                global phone1
+                phone1 = None
+                return Response({"message": 'Your Successfully ', "data": request.data, "ststus": 'Successful'})
+            return Response({"message": 'unable to pair', "data": request.data, "ststus": 'Failure'})
+        else:
+            return Response({"message": "you haven't genereted otp", "data": request.data, "ststus": 'Failure'})
+
+class UserCreateAPIView(CreateAPIView):
+    queryset = Register.objects.all()
+    serializer_class = RegSerializer
+
+class UserdestroyAPI(DestroyAPIView):
+    queryset = Register.objects.all()
+    serializer_class = RegSerializer
+    lookup_field = 'user'
+
+class UserupdateAPI(ListAPIView):
+    queryset = Register.objects.all()
+    serializer_class = RegSerializer
+
+
+class UserRetrieveAPIView(RetrieveAPIView):
+    queryset = Register.objects.all()
+    serializer_class = RegSerializer
+    lookup_field = 'user'
+   # lookup_field = id
+class UserUpdateAPIView(UpdateAPIView):
+    queryset = Register.objects.all()
+    serializer_class = RegSerializer
+    lookup_field = 'user'
 
 class SerializerUser(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -118,6 +147,8 @@ class SerializerUser(viewsets.ModelViewSet):
 class SerializerReg(viewsets.ModelViewSet):
     queryset = Register.objects.all()
     serializer_class = RegSerializer
+
+
 
 def login(request):
     form= LoginForm(request.POST or None)
@@ -157,3 +188,17 @@ class Pro_User(APIView):
         re_ser= RegSerializer(reg, many=True)
 
         return Response({'user data':usernames.data,'reg data': re_ser.data})
+
+
+class SampleOtpGen(APIView):
+
+    def post(self, request):
+        serializer = PhoneSerializer(data=request.data)
+        if serializer.is_valid():
+            pass
+
+class SampleOtpver(APIView):
+    def post(self, request):
+        serializer = OtpSerializer(data=request.data)
+        if serializer.is_valid():
+            pass

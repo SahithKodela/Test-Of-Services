@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from reg.views import login,reg,Pro_User,SerializerUser, SerializerReg, otp_gen, otp_ver
+from reg.views import login,reg,Pro_User,SerializerUser, SerializerReg, otp_gen, otp_ver, UserupdateAPI, UserRetrieveAPIView, UserUpdateAPIView, UserdestroyAPI,SampleOtpver, UserCreateAPIView, SampleOtpGen
 from rest_framework import routers
 
 
@@ -28,8 +28,16 @@ urlpatterns = [
     url(r'^$', login),
     url(r'^otp_gen/', otp_gen),
     url(r'^otp_ver/', otp_ver),
+url(r'^SampleOtpGen/', SampleOtpGen.as_view()),
+url(r'^SampleOtpver/', SampleOtpver.as_view()),
+
     url(r'^reg/',reg),
     url(r'^pro_user/',Pro_User.as_view()),
-    url(r'',include(router.urls))
+    url(r'',include(router.urls)),
+    url(r'post/', UserCreateAPIView.as_view()),
+    url(r'register/', UserupdateAPI.as_view()),
+    url(r'^(?P<user>[\w-]+)/$', UserRetrieveAPIView.as_view()),
+    url(r'^(?P<user>[\w-]+)/update$', UserUpdateAPIView.as_view()),
+    url(r'^(?P<user>[\w-]+)/destroy', UserdestroyAPI.as_view()),
 
 ]
